@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/screens/home_screen.dart';
 import 'package:ecommerce_app/screens/login_screen.dart';
+import 'package:ecommerce_app/screens/product_detail_screen.dart';
 import 'package:ecommerce_app/widgets/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
+import '../UserData.dart';
 import '../constants.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -149,28 +152,72 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                               String userId = user.uid;
 
-                              _firestore.collection("users").add({
-                                "user_id": userId,
-                                "first_name": firstName,
-                                "last_name": lastName,
-                                "email": email,
-                                "mobile_num": mobileNum,
-                                "address": address
-                              });
+                              try {
+                                final firestoreResult = await _firestore
+                                    .collection("users")
+                                    .document(userId)
+                                    .setData({
+                                  "first_name": firstName,
+                                  "last_name": lastName,
+                                  "email": email,
+                                  "mobile_num": mobileNum,
+                                  "address": address,
+                                  "role": "user"
+                                });
+                                if (user != null) {
+                                  var document = await Firestore.instance
+                                      .collection('users')
+                                      .document(user.uid)
+                                      .get()
+                                      .then((data) {
+                                    print(data['name']);
+                                    bool isAdmin = data["role"] == 'admin';
+                                    String Fname = data['first_name'];
+                                    String Lname = data['last_name'];
+                                    String address = data['address'];
+                                    String num = data['mobile_num'];
+                                    print("Role of User :  $data['role']");
+                                    Provider.of<UserData>(context,
+                                            listen: false)
+                                        .setUser(
+                                            id: user.uid,
+                                            email: user.email,
+                                            firstName: Fname,
+                                            lastName: Lname,
+                                            address: address,
+                                            mobileNum: num,
+                                            adminStatus: false);
+                                  }).catchError((e) {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                    Utils.showAlertDialog(
+                                        context, "Error", e.toString());
+                                    return;
+                                  });
+                                }
+                              } catch (e) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                Utils.showAlertDialog(
+                                    context, "Error", e.toString());
+                                return;
+                              }
 
                               if (user != null) {
                                 setState(() {
                                   _isLoading = false;
                                 });
-                                Navigator.pushReplacementNamed(
-                                    context, HomePage.id);
+                                Navigator.of(context)
+                                    .pushReplacementNamed(HomeScreen.id);
                               }
                             } catch (e) {
-                              Utils.showAlertDialog(
-                                  context, "Error", e.toString());
                               setState(() {
                                 _isLoading = false;
                               });
+                              Utils.showAlertDialog(
+                                  context, "Error", e.toString());
                             }
                           },
                         )

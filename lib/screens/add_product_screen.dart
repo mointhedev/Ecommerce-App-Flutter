@@ -1,9 +1,11 @@
+import 'package:basic_utils/basic_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/models/Product.dart';
+import 'package:ecommerce_app/widgets/mydrawer.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-
 import '../constants.dart';
 import '../widgets/appbar.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +23,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _descController = TextEditingController();
   Category _category = Category.electronics;
   var image;
-  String _imageUrl;
 
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = false;
 
@@ -32,9 +34,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
     return ModalProgressHUD(
       inAsyncCall: _isLoading,
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: MyAppBar(
           title: 'Add Product',
         ),
+        drawer: MyDrawer(true),
         body: SingleChildScrollView(
           child: Container(
             height: 580,
@@ -54,31 +58,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         TextFormField(
                           controller: _priceController,
                           decoration: InputDecoration(labelText: 'Price'),
+                          keyboardType: TextInputType.number,
                         ),
                         TextFormField(
                           controller: _quantityController,
                           decoration: InputDecoration(labelText: 'Quantity'),
+                          keyboardType: TextInputType.number,
                         ),
                         DropdownButtonFormField(
+                          value: _category,
                           onChanged: (value) {
-                            if (value.toString().startsWith('E'))
-                              _category = Category.electronics;
-                            else if (value.toString().startsWith('F'))
-                              _category = Category.food;
-                            else
-                              _category = Category.garments;
+                            setState(() {
+                              _category = value;
+                            });
                           },
-                          items: [
-                            DropdownMenuItem(
-                              child: Text('Electronics'),
-                            ),
-                            DropdownMenuItem(
-                              child: Text("Food"),
-                            ),
-                            DropdownMenuItem(
-                              child: Text("Garments"),
-                            ),
-                          ],
+                          items: Category.values.map((Category category) {
+                            return DropdownMenuItem<Category>(
+                              value: category,
+                              child: Text(Utils.integerToCategoryString(
+                                  category.index)),
+                            );
+                          }).toList(),
                         ),
                         TextFormField(
                           controller: _descController,
@@ -114,28 +114,83 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     color: Colors.yellow,
                     child: Text('Add Product'),
                     onPressed: () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
+                      String urlLink;
                       try {
-                        StorageReference storageReference = FirebaseStorage
-                            .instance
-                            .ref()
-                            .child(DateTime.now().toString());
-                        //upload the file to Firebase Storage
-                        final StorageUploadTask uploadTask =
-                            storageReference.putFile(image);
-                        final StorageTaskSnapshot downloadUrl =
-                            (await uploadTask.onComplete);
+                        if (image != null) {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          StorageReference storageReference = FirebaseStorage
+                              .instance
+                              .ref()
+                              .child(DateTime.now().toString());
+                          //upload the file to Firebase Storage
+                          final StorageUploadTask uploadTask =
+                              storageReference.putFile(image);
+                          final StorageTaskSnapshot downloadUrl =
+                              (await uploadTask.onComplete);
 
-                        String urlLink =
-                            (await downloadUrl.ref.getDownloadURL());
+                          urlLink = (await downloadUrl.ref.getDownloadURL());
+                        } else {
+                          Utils.showAlertDialog(
+                              context, "Please select an Image", "");
+                          return;
+                        }
 
+                        String title = _titleController.text.trim();
+                        double price =
+                            double.tryParse(_priceController.text.trim()) ??
+                                -1.0;
+                        int quantity =
+                            int.tryParse(_quantityController.text.trim()) ?? -1;
+                        String desc = _descController.text.trim();
+
+                        if (title.isNotEmpty &&
+                            price > 0 &&
+                            quantity > 0 &&
+                            desc.isNotEmpty &&
+                            urlLink != null) {
+                          Firestore.instance.collection("products").add({
+                            "title": title,
+                            "price": price,
+                            "total_quantity": quantity,
+                            "description": desc,
+                            "category": _category.index,
+                            "image_url": urlLink
+                          }).then((_) {
+                            formKey.currentState.reset();
+                            _titleController.clear();
+                            _priceController.clear();
+                            _quantityController.clear();
+                            _descController.clear();
+                            image = null;
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Utils.showInSnackBar(
+                                "Product Added To Firstore", _scaffoldKey);
+                          }).catchError((e) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Utils.showAlertDialog(
+                                context, "Error", e.toString());
+                            return;
+                          });
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          Utils.showAlertDialog(
+                              context,
+                              "One or more of the fields are incorrectly filled",
+                              "");
+                          return;
+                        }
+                      } catch (e) {
                         setState(() {
-                          _imageUrl = urlLink;
                           _isLoading = false;
                         });
-                      } catch (e) {
                         Utils.showAlertDialog(context, "Error", e.toString());
                       }
                     },

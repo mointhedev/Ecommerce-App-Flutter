@@ -8,11 +8,12 @@ class Product {
   String imageUrl;
   int totalQuantity;
   List<Review> reviews;
-  Category category;
+  String category;
   double rating;
 
   Product(
-      {this.title,
+      {this.id,
+      this.title,
       this.price,
       this.description,
       this.category,
@@ -20,4 +21,4 @@ class Product {
       this.totalQuantity});
 }
 
-enum Category { garments, electronics, food }
+enum Category { electronics, garments, food }

@@ -1,12 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecommerce_app/models/Product.dart';
 import 'package:ecommerce_app/screens/product_detail_screen.dart';
+import 'package:ecommerce_app/widgets/myimage.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_button/progress_button.dart';
 
 class ProductCard extends StatelessWidget {
-  final String title;
-  final int price;
-  final String imageUrl;
+  final Product product;
+  final ProgressButton progressButton;
 
-  ProductCard({this.title, this.price, this.imageUrl});
+  ProductCard({this.product, this.progressButton});
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +19,14 @@ class ProductCard extends StatelessWidget {
           Container(
             height: 40,
             width: 40,
-            child: Image.network(imageUrl),
+            child: CachedNetworkImage(
+              imageUrl: product.imageUrl,
+              placeholder: (context, url) => new CircularProgressIndicator(),
+              errorWidget: (context, url, error) => new Icon(Icons.error),
+            ),
           ),
-          Text(title),
-          Text('\$price'),
+          Text(product.title),
+          Text('${product.price}'),
           FlatButton(
             color: Colors.yellow,
             onPressed: () {
