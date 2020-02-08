@@ -58,7 +58,7 @@ class Utils {
       return 'Electronics';
     else if (Category.garments.index == i)
       return 'Garments';
-    else if (Category.garments.index == i)
+    else if (Category.food.index == i)
       return 'Food';
     else
       return "Unknown";

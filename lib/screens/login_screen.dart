@@ -90,27 +90,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                     password: passController.text.trim());
                             final FirebaseUser user = result.user;
                             if (user != null) {
-                              var document = await Firestore.instance
+                              Firestore.instance
                                   .collection('users')
                                   .document(user.uid)
                                   .get()
                                   .then((data) {
-                                print(data['name']);
-                                bool isAdmin = data["role"] == 'admin';
-                                String Fname = data['first_name'];
-                                String Lname = data['last_name'];
-                                String address = data['address'];
-                                String num = data['mobile_num'];
-                                print("Role of User :  $data['role']");
-                                Provider.of<UserData>(context, listen: false)
-                                    .setUser(
-                                        id: user.uid,
-                                        email: user.email,
-                                        firstName: Fname,
-                                        lastName: Lname,
-                                        address: address,
-                                        mobileNum: num,
-                                        adminStatus: isAdmin);
+                                data.reference
+                                    .collection('cart')
+                                    .getDocuments()
+                                    .then((snapshot) {
+                                  Provider.of<UserData>(context, listen: false)
+                                      .setUserWithoutNotifying(
+                                          userData: data,
+                                          cartSnapshots: snapshot.documents);
+                                }).catchError((error) {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                  Utils.showAlertDialog(
+                                      context, "Error", error.toString());
+                                  return;
+                                });
                               }).catchError((e) {
                                 setState(() {
                                   _isLoading = false;

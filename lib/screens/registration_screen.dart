@@ -165,28 +165,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   "role": "user"
                                 });
                                 if (user != null) {
-                                  var document = await Firestore.instance
+                                  Firestore.instance
                                       .collection('users')
                                       .document(user.uid)
                                       .get()
                                       .then((data) {
-                                    print(data['name']);
-                                    bool isAdmin = data["role"] == 'admin';
-                                    String Fname = data['first_name'];
-                                    String Lname = data['last_name'];
-                                    String address = data['address'];
-                                    String num = data['mobile_num'];
-                                    print("Role of User :  $data['role']");
                                     Provider.of<UserData>(context,
                                             listen: false)
-                                        .setUser(
-                                            id: user.uid,
-                                            email: user.email,
-                                            firstName: Fname,
-                                            lastName: Lname,
-                                            address: address,
-                                            mobileNum: num,
-                                            adminStatus: false);
+                                        .setUserWithoutNotifying(
+                                            userData: data);
                                   }).catchError((e) {
                                     setState(() {
                                       _isLoading = false;

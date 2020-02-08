@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/models/Product.dart';
+import 'package:ecommerce_app/screens/cart_screen.dart';
 import 'package:ecommerce_app/widgets/appbar.dart';
 import 'package:ecommerce_app/widgets/mydrawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:progress_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,113 +23,125 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  Firestore _firestore = Firestore.instance;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = false;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  void checkifAdmin() async {
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      final user = await _auth.currentUser();
-//      if (user != null) {
-//        var userQuery = Firestore.instance
-//            .collection('Users')
-//            .where('e-mail', isEqualTo: user.email)
-//            .limit(1);
-//        userQuery.getDocuments().then((value) {
-//          bool some = value.documents[0].data["role"];
-//        });}
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool jsonString = prefs.get("isAdmin");
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print(e);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('IsAdmin Value: ${Provider.of<UserData>(context).isAdmin}');
-    return ChangeNotifierProvider(
-      create: (context) => ProductData(),
-      child: Scaffold(
-          appBar: MyAppBar(
-            title: "Home",
+    final UserData _user = Provider.of<UserData>(context);
+    print('IsAdmin Value: ${_user.isAdmin}');
+    return Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(title: Text('Home'), actions: <Widget>[
+          GestureDetector(
+            onTap: _user.getCartQuantity() > 0
+                ? () {
+                    Navigator.of(context).pushNamed(CartScreen.id);
+                  }
+                : () {},
+            child: Stack(children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white,
+                ),
+                onPressed: null,
+              ),
+              _user.getCartQuantity() == 0
+                  ? Container()
+                  : Positioned(
+                      child: Stack(
+                      children: <Widget>[
+                        Icon(Icons.brightness_1,
+                            size: 20.0, color: Colors.red[800]),
+                        Positioned(
+                            top: 4.0,
+                            right: 6.0,
+                            child: Center(
+                              child: Text(
+                                _user.getCartQuantity().toString(),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            )),
+                      ],
+                    ))
+            ]),
           ),
-          drawer: MyDrawer(Provider.of<UserData>(context).isAdmin),
-          body: Container(
-            child: SingleChildScrollView(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: Category.values.map((Category category) {
-                    return StreamBuilder<QuerySnapshot>(
-                        stream: Firestore.instance
-                            .collection('products')
-//            .orderBy('time', descending: true)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          _isLoading = false;
-                          if (snapshot.hasError) {
-                            return Center(child: Text('An Error Occured'));
-                          }
+        ]),
+        drawer: MyDrawer(_user.isAdmin),
+        body: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Container(
+                child: SingleChildScrollView(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: Category.values.map((Category category) {
+                        return StreamBuilder<QuerySnapshot>(
+                            stream:
+                                _firestore.collection('products').snapshots(),
+                            builder: (context, snapshot) {
+                              _isLoading = false;
+                              if (snapshot.hasError) {
+                                return Center(child: Text('An Error Occured'));
+                              }
 
-                          if (!snapshot.hasData) {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                          final productsSnapshot = snapshot.data.documents;
-                          List<Product> products = [];
+                              if (!snapshot.hasData) {
+                                return Center(
+                                    child: CircularProgressIndicator());
+                              }
 
-                          for (var product in productsSnapshot) {
-                            final id = product.documentID;
-                            final title = product.data['title'];
-                            final price = product.data['price'];
-                            final quantity = product.data['total_quantity'];
-                            final category = product.data['category'];
-                            final imageUrl = product.data['image_url'];
-                            final desc = product.data['description'];
-                            final productItem = Product(
-                                id: id,
-                                title: title,
-                                price: price,
-                                totalQuantity: quantity,
-                                description: desc,
-                                category:
-                                    Utils.integerToCategoryString(category),
-                                imageUrl: imageUrl);
-                            products.add(productItem);
-                          }
-                          Provider.of<ProductData>(context, listen: false)
-                              .setHomeProductList(products);
+                              final productsSnapshots = snapshot.data.documents;
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Category Name'),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    //scrollDirection: Axis.horizontal,
-                                    children: products.map((product) {
-                                      return ProductCard();
-                                    }).toList()),
-                              )
-                            ],
-                          );
-                        });
-                  }).toList()),
-            ),
-          )),
-    );
+                              Provider.of<ProductData>(context, listen: false)
+                                  .setHomeProductList(
+                                      productsSnapshots: productsSnapshots);
+
+                              List<Product> products =
+                                  Provider.of<ProductData>(context)
+                                      .getHomeProducts();
+
+                              return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(Utils.integerToCategoryString(
+                                            category.index)),
+                                      ],
+                                    ),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: products.isEmpty
+                                          ? Center(
+                                              child: Text('No Products found'),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: products
+                                                  .where((product) =>
+                                                      Utils.stringToCategory(
+                                                          product.category) ==
+                                                      category)
+                                                  .map((product) {
+                                                return ProductCard(
+                                                    product: product,
+                                                    scaffoldKey: _scaffoldKey);
+                                              }).toList()),
+                                    )
+                                  ]);
+                            });
+                      }).toList()),
+                ),
+              ));
   }
 }

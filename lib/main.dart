@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/UserData.dart';
+import 'package:ecommerce_app/screens/cart_screen.dart';
 import 'package:ecommerce_app/screens/product_list_screen.dart';
 import 'package:provider/provider.dart';
+import 'ProductData.dart';
 import 'constants.dart';
+import 'models/UserProduct.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/product_detail_screen.dart';
@@ -27,9 +30,14 @@ class _MyAppState extends State<MyApp> {
   bool error = false;
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<UserData>(
-      create: (context) => UserData(),
+    return MultiProvider(
+      providers: [
+//        FutureProvider(create: (_) => UserData().getCurrentUser()),
+        ChangeNotifierProvider(create: (_) => ProductData()),
+        ChangeNotifierProvider(create: (_) => UserData()),
+      ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Ecommerce App',
         theme: ThemeData(
           primarySwatch: Colors.blue,
@@ -39,8 +47,6 @@ class _MyAppState extends State<MyApp> {
               future: FirebaseAuth.instance.currentUser(),
               builder:
                   (BuildContext context, AsyncSnapshot<FirebaseUser> snapshot) {
-                print("User snapshot Data = ${snapshot.data}");
-
                 if (snapshot.hasError) {
                   return Utils.getErrorScreen();
                 }
@@ -49,51 +55,76 @@ class _MyAppState extends State<MyApp> {
                 }
 
                 if (snapshot.hasData) {
-                  if (home) {
-                    return HomeScreen();
-                  }
-
-                  FirebaseAuth.instance.currentUser().then((FirebaseUser user) {
-                    if (user != null) {
-                      print('User email ${user.email}');
-                      Firestore.instance
+                  String userId = snapshot.data.uid;
+                  return FutureBuilder<DocumentSnapshot>(
+                      future: Firestore.instance
                           .collection('users')
-                          .document(user.uid)
-                          .get()
-                          .then((data) {
-                        bool isAdmin = data["role"] == 'admin';
-                        String Fname = data['first_name'];
-                        String Lname = data['last_name'];
-                        String address = data['address'];
-                        String num = data['mobile_num'];
-                        print("Role of User :  $data['role']");
-                        Provider.of<UserData>(context, listen: false).setUser(
-                            id: user.uid,
-                            email: user.email,
-                            firstName: Fname,
-                            lastName: Lname,
-                            address: address,
-                            mobileNum: num,
-                            adminStatus: isAdmin);
-                        setState(() {
-                          home = true;
-                        });
-                        return HomeScreen();
-                      }).catchError((e) {
-                        setState(() {
-                          error = true;
-                        });
-                        return Utils.getErrorScreen();
+                          .document(userId)
+                          .get(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<DocumentSnapshot> snapshot) {
+                        if (snapshot.hasError) {
+                          return Utils.getErrorScreen();
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Utils.getLoadingScreen();
+                        }
+
+                        if (snapshot.hasData) {
+                          var userData = snapshot.data;
+
+                          print('After getting user data');
+
+                          return FutureBuilder<QuerySnapshot>(
+                              future: userData.reference
+                                  .collection('cart')
+                                  .getDocuments(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Utils.getErrorScreen();
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Utils.getLoadingScreen();
+                                }
+
+                                if (snapshot.hasData) {
+                                  var cartSnapshot = snapshot.data;
+
+                                  print('After getting user data');
+
+                                  print('After getting cart data');
+
+                                  if (cartSnapshot.documents.length > 0) {
+                                    print('Cart Document exists');
+                                    var cartSnapshots = cartSnapshot.documents;
+                                    Provider.of<UserData>(context,
+                                            listen: false)
+                                        .setUserWithoutNotifying(
+                                            userData: userData,
+                                            cartSnapshots: cartSnapshots);
+                                  } else {
+                                    print('Cart Document does not exists');
+
+                                    Provider.of<UserData>(context,
+                                            listen: false)
+                                        .setUserWithoutNotifying(
+                                            userData: userData);
+                                  }
+
+                                  return HomeScreen();
+                                }
+
+                                /// other way there is no user logged.
+                                return LoginScreen();
+                              });
+                        }
+
+                        /// other way there is no user logged.
+                        return LoginScreen();
                       });
-                    }
-                  }).catchError((e) {
-                    setState(() {
-                      error = true;
-                    });
-                    return Utils.getErrorScreen();
-                  });
-                  if (!home && !error) return Utils.getLoadingScreen();
-                  if (error) return Utils.getErrorScreen();
                 }
 
                 /// other way there is no user logged.
@@ -105,6 +136,7 @@ class _MyAppState extends State<MyApp> {
           RegistrationScreen.id: (context) => RegistrationScreen(),
           AddProductScreen.id: (context) => AddProductScreen(),
           ProductListScreen.id: (context) => ProductListScreen(),
+          CartScreen.id: (context) => CartScreen(),
         },
         onUnknownRoute: (settings) => MaterialPageRoute(
             builder: (context) => UndefinedScreen(

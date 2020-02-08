@@ -83,7 +83,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     builder: (ctx) =>
                                         EditProductScreen(product: product)));
 
-                            success
+                            success ?? false
                                 ? Utils.showInSnackBar(
                                     "Product updated in firestore",
                                     _scaffoldKey)
