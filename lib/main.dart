@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/UserData.dart';
 import 'package:ecommerce_app/screens/cart_screen.dart';
+import 'package:ecommerce_app/screens/order_list_screen.dart';
 import 'package:ecommerce_app/screens/product_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'ProductData.dart';
 import 'constants.dart';
-import 'models/UserProduct.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/product_detail_screen.dart';
@@ -132,11 +132,11 @@ class _MyAppState extends State<MyApp> {
               }),
           HomeScreen.id: (context) => HomeScreen(),
           LoginScreen.id: (context) => LoginScreen(),
-          ProductDetailScreen.id: (context) => ProductDetailScreen(),
           RegistrationScreen.id: (context) => RegistrationScreen(),
           AddProductScreen.id: (context) => AddProductScreen(),
           ProductListScreen.id: (context) => ProductListScreen(),
           CartScreen.id: (context) => CartScreen(),
+          OrderListScreen.id: (context) => OrderListScreen(),
         },
         onUnknownRoute: (settings) => MaterialPageRoute(
             builder: (context) => UndefinedScreen(

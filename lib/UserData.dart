@@ -3,6 +3,8 @@ import 'package:ecommerce_app/models/UserProduct.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'models/Product.dart';
+
 class UserData extends ChangeNotifier {
   bool isAdmin = false;
   String id;
@@ -67,12 +69,16 @@ class UserData extends ChangeNotifier {
 //  }
 
   List<UserProduct> getCart() {
-    return cart != null ? cart : [];
+    return cart != null ? cart : <List<UserProduct>>[];
   }
 
   addCartList(List<UserProduct> cartList) {
     cart ??= [];
     cart = List<UserProduct>.from(cartList);
+  }
+
+  refreshCart() {
+    cart = [];
   }
 
   int getCartQuantity() {
@@ -86,7 +92,7 @@ class UserData extends ChangeNotifier {
   setUserWithoutNotifying(
       {DocumentSnapshot userData, List<DocumentSnapshot> cartSnapshots}) {
     List<UserProduct> cartList = [];
-    if (cartSnapshots.length > 0) {
+    if (cartSnapshots != null && cartSnapshots.length > 0) {
       for (var cartData in cartSnapshots) {
         final productId = cartData.documentID;
         final quantity = cartData['quantity'];
@@ -102,6 +108,16 @@ class UserData extends ChangeNotifier {
     this.isAdmin = userData['role'] == 'admin';
     cart ??= [];
     this.cart = List<UserProduct>.from(cartList);
+  }
+
+  String getTotal(List<Product> cart) {
+    double total = 0.0;
+    if (cart.isNotEmpty && cart != null) {
+      cart.forEach((item) {
+        total = total + item.price * item.totalQuantity.toDouble();
+      });
+    }
+    return total > 0.0 ? total.toStringAsFixed(2) : total.toString();
   }
 
   setUserEmail(String email) {

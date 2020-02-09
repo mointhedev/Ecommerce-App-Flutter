@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/models/Product.dart';
-import 'package:ecommerce_app/models/UserProduct.dart';
 import 'package:ecommerce_app/screens/checkout_screen.dart';
 import 'package:ecommerce_app/widgets/appbar.dart';
 import 'package:ecommerce_app/widgets/myimage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../ProductData.dart';
@@ -101,9 +99,7 @@ class _CartScreenState extends State<CartScreen> {
                                         )),
                                   ),
                                   onDismissed: (_) {
-                                    Future.delayed(Duration(seconds: 2), () {
-                                      setUserData.removeFromCart(product.id);
-                                    });
+                                    setUserData.removeFromCart(product.id);
                                     _firestore
                                         .collection('users')
                                         .document(userData.id)
@@ -229,10 +225,14 @@ class _CartScreenState extends State<CartScreen> {
                                 Text('Total : \$${total.toStringAsFixed(2)}'),
                             trailing: RaisedButton(
                               color: Colors.yellow,
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => CheckoutScreen()));
-                              },
+                              onPressed: total > 0.0
+                                  ? () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (_) => CheckoutScreen(
+                                                  cartProducts)));
+                                    }
+                                  : null,
                               child: Text('Checkout'),
                             )),
                       ),

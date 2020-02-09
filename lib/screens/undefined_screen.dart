@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 
 class UndefinedScreen extends StatelessWidget {
@@ -6,9 +7,14 @@ class UndefinedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Text('Error routing to $name Screen'),
+    return Scaffold(
+      appBar: MyAppBar(
+        title: 'Error',
+      ),
+      body: Container(
+        child: Center(
+          child: Text('Error routing to $name'),
+        ),
       ),
     );
   }

@@ -1,7 +1,5 @@
-import 'package:basic_utils/basic_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/models/Product.dart';
-import 'package:ecommerce_app/widgets/mydrawer.dart';
 import 'package:ecommerce_app/widgets/myimage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -174,7 +172,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
                                 if (title.isNotEmpty &&
                                     price > 0 &&
-                                    quantity > 0 &&
+                                    quantity >= 0 &&
                                     desc.isNotEmpty &&
                                     urlLink != null) {
                                   Firestore.instance

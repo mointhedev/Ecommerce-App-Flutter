@@ -1,9 +1,8 @@
 class Order {
   String orderId;
-  DateTime date;
   double totalAmount;
-  OrderStatus status;
-  PaymentMethod paymentMethod;
+  String status;
+  String paymentMethod;
   String shippingAddress;
 }
 
@@ -13,4 +12,4 @@ enum OrderStatus {
   shipped,
 }
 
-enum PaymentMethod { cod, mastercard }
+enum PaymentMethod { cod, bank }
