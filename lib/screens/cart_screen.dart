@@ -6,7 +6,6 @@ import 'package:ecommerce_app/widgets/myimage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../ProductData.dart';
 import '../UserData.dart';
 import '../constants.dart';

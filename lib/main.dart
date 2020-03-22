@@ -41,6 +41,7 @@ class _MyAppState extends State<MyApp> {
         title: 'Ecommerce App',
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          iconTheme: IconThemeData(color: Colors.black),
         ),
         routes: {
           '/': (context) => FutureBuilder<FirebaseUser>(

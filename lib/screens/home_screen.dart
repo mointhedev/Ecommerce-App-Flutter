@@ -31,34 +31,28 @@ class _HomeScreenState extends State<HomeScreen> {
     print('IsAdmin Value: ${_user.isAdmin}');
     return Container(
       decoration: new BoxDecoration(
-        gradient: new LinearGradient(
-            colors: [
-              const Color(0xFF3366FF),
-              const Color(0xFF00CCFF),
-            ],
-            begin: const FractionalOffset(0.0, 0.0),
-            end: const FractionalOffset(1.0, 0.0),
-            stops: [0.0, 1.0],
-            tileMode: TileMode.clamp),
-      ),
+//        gradient: new LinearGradient(
+//            colors: [
+//              const Color(0xFF3366FF),
+//              const Color(0xFF00CCFF),
+//            ],
+//            begin: const FractionalOffset(0.0, 0.0),
+//            end: const FractionalOffset(1.0, 0.0),
+//            stops: [0.0, 1.0],
+//            tileMode: TileMode.clamp),
+          color: Colors.white),
       child: Scaffold(
           backgroundColor: Colors.transparent,
           key: _scaffoldKey,
           appBar: AppBar(
+              iconTheme: IconThemeData(color: Colors.black),
               flexibleSpace: Container(
-                decoration: new BoxDecoration(
-                  gradient: new LinearGradient(
-                      colors: [
-                        const Color(0xFF3366FF),
-                        const Color(0xFF00CCFF),
-                      ],
-                      begin: const FractionalOffset(0.0, 0.0),
-                      end: const FractionalOffset(1.0, 0.0),
-                      stops: [0.0, 1.0],
-                      tileMode: TileMode.clamp),
-                ),
+                decoration: new BoxDecoration(color: Colors.white),
               ),
-              title: Text('Home'),
+              title: Text(
+                'Home',
+                style: TextStyle(color: Colors.black),
+              ),
               actions: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
@@ -72,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       IconButton(
                         icon: Icon(
                           Icons.shopping_cart,
-                          color: Colors.white,
+                          color: Colors.black,
                           size: 26,
                         ),
                         onPressed: null,
@@ -174,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 18,
-                                                  color: Colors.white),
+                                                  color: Colors.black),
                                             ),
                                           ],
                                         ),
@@ -204,13 +198,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       SizedBox(
                                         height: 20,
                                       ),
-                                      Divider(
-                                        color: Colors.black26,
-                                        thickness: 2,
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      )
+//                                      Divider(
+//                                        color: Colors.black26,
+//                                        thickness: 2,
+//                                      ),
+//                                      SizedBox(
+//                                        height: 10,
+//                                      )
                                     ]);
                               });
                         }).toList()

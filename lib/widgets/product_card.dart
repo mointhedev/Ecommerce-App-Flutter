@@ -39,8 +39,10 @@ class _ProductCardState extends State<ProductCard> {
             }
           : null,
       child: Container(
+        color: Colors.white70,
         width: 150,
         child: Card(
+          elevation: 8,
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Column(

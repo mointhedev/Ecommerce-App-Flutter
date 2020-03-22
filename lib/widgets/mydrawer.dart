@@ -18,37 +18,25 @@ class MyDrawer extends StatelessWidget {
     return Drawer(
         child: Consumer<UserData>(builder: (context, userData, child) {
       return Container(
-        decoration: new BoxDecoration(
-          gradient: new LinearGradient(
-              colors: [
-                const Color(0xFF3366FF),
-                const Color(0xFF00CCFF),
-              ],
-              begin: const FractionalOffset(0.0, 0.0),
-              end: const FractionalOffset(1.0, 0.0),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.clamp),
-        ),
+        decoration: new BoxDecoration(color: Colors.white),
         child: Column(
           children: <Widget>[
             UserAccountsDrawerHeader(
               decoration: new BoxDecoration(
-                gradient: new LinearGradient(
-                    colors: [
-                      const Color(0xFF3366FF),
-                      const Color(0xFF00CCFF),
-                    ],
-                    begin: const FractionalOffset(0.0, 0.0),
-                    end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
-                    tileMode: TileMode.clamp),
+                color: Color(0xfffff),
               ),
-              accountEmail: Text(" ${userData.email}"),
+              accountEmail: Text(
+                " ${userData.email}",
+                style: TextStyle(color: Colors.black87),
+              ),
               currentAccountPicture: Icon(
                 Icons.account_circle,
                 size: 60,
               ),
-              accountName: Text(" ${userData.name}"),
+              accountName: Text(
+                " ${userData.name}",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
             Divider(
               color: Colors.black26,
@@ -60,10 +48,13 @@ class MyDrawer extends StatelessWidget {
               },
               child: Container(
                 margin: EdgeInsets.all(8),
-                color: Colors.lightGreenAccent,
-                child: ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text("Home"),
+                color: Colors.white,
+                child: Card(
+                  elevation: 3,
+                  child: ListTile(
+                    leading: Icon(Icons.home),
+                    title: Text("Home"),
+                  ),
                 ),
               ),
             ),
@@ -75,10 +66,13 @@ class MyDrawer extends StatelessWidget {
               },
               child: Container(
                 margin: EdgeInsets.all(8),
-                color: Colors.amber,
-                child: ListTile(
-                  leading: Icon(Icons.exit_to_app),
-                  title: Text("Log out"),
+                color: Colors.white,
+                child: Card(
+                  elevation: 3,
+                  child: ListTile(
+                    leading: Icon(Icons.exit_to_app),
+                    title: Text("Log out"),
+                  ),
                 ),
               ),
             ),
@@ -96,10 +90,13 @@ class MyDrawer extends StatelessWidget {
         },
         child: Container(
           margin: EdgeInsets.all(8),
-          color: Colors.lightGreenAccent,
-          child: ListTile(
-            leading: Icon(Icons.add_box),
-            title: Text("Add Product"),
+          color: Colors.white,
+          child: Card(
+            elevation: 3,
+            child: ListTile(
+              leading: Icon(Icons.add_box),
+              title: Text("Add Product"),
+            ),
           ),
         ),
       ),
@@ -109,10 +106,13 @@ class MyDrawer extends StatelessWidget {
         },
         child: Container(
           margin: EdgeInsets.all(8),
-          color: Colors.lightGreenAccent,
-          child: ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Product List"),
+          color: Colors.white,
+          child: Card(
+            elevation: 3,
+            child: ListTile(
+              leading: Icon(Icons.list),
+              title: Text("Product List"),
+            ),
           ),
         ),
       ),
@@ -122,10 +122,13 @@ class MyDrawer extends StatelessWidget {
         },
         child: Container(
           margin: EdgeInsets.all(8),
-          color: Colors.lightGreenAccent,
-          child: ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Order List"),
+          color: Colors.white,
+          child: Card(
+            elevation: 3,
+            child: ListTile(
+              leading: Icon(Icons.list),
+              title: Text("Order List"),
+            ),
           ),
         ),
       ),

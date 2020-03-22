@@ -70,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Padding(
                             padding: const EdgeInsets.all(18.0),
                             child: RaisedButton(
-                              color: Colors.lightGreenAccent,
+                              color: Colors.yellowAccent,
                               child: Text('Sign in'),
                               onPressed: () async {
                                 if (emailController.text.isEmpty ||

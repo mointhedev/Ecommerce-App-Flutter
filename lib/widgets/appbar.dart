@@ -18,19 +18,12 @@ class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(widget.title),
+      title: Text(
+        widget.title,
+        style: TextStyle(color: Colors.black),
+      ),
       flexibleSpace: Container(
-        decoration: new BoxDecoration(
-          gradient: new LinearGradient(
-              colors: [
-                const Color(0xFF3366FF),
-                const Color(0xFF00CCFF),
-              ],
-              begin: const FractionalOffset(0.0, 0.0),
-              end: const FractionalOffset(1.0, 0.0),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.clamp),
-        ),
+        decoration: new BoxDecoration(color: Colors.white),
       ),
     );
   }
